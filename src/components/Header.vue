@@ -2,10 +2,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const menuItems = ref([
-  { id: 1, label: 'HOME', href: '/' },
-  { id: 2, label: 'SOBRE', href: '#sobre' },
+  { id: 1, label: 'HOME', to: '/' },
+  { id: 2, label: 'SOBRE', to: '/sobre' },
   { id: 3, label: 'VEICULOS', hasMenu: true },
-  { id: 4, label: 'SERVIÇOS', href: '/servicos' },
+  { id: 4, label: 'SERVIÇOS', to: '/servicos' },
+  /* Ainda não existe a rota /teste-drive: por enquanto é só uma âncora na página */
   { id: 5, label: 'TESTE DRIVE', href: '#teste-drive' }
 ])
 
@@ -15,42 +16,36 @@ const vehicles = ref([
     id: 1,
     name: 'MODELO V1',
     image: new URL('../assets/Car2.png', import.meta.url).href,
-    moreHref: '#model-v1',
     buyHref: '#comprar-v1'
   },
   {
     id: 2,
     name: 'MODELO V2',
     image: new URL('../assets/Car1.png', import.meta.url).href,
-    moreHref: '#model-v2',
     buyHref: '#comprar-v2'
   },
   {
     id: 3,
     name: 'MODELO V3',
     image: new URL('../assets/Car1.png', import.meta.url).href,
-    moreHref: '#model-v3',
     buyHref: '#comprar-v3'
   },
   {
     id: 4,
     name: 'MODELO V4',
     image: new URL('../assets/Car1.png', import.meta.url).href,
-    moreHref: '#model-v4',
     buyHref: '#comprar-v4'
   },
   {
     id: 5,
     name: 'MODELO V4',
     image: new URL('../assets/Car1.png', import.meta.url).href,
-    moreHref: '#model-v4',
     buyHref: '#comprar-v4'
   },
   {
     id: 6,
     name: 'MODELO V4',
     image: new URL('../assets/Car1.png', import.meta.url).href,
-    moreHref: '#model-v4',
     buyHref: '#comprar-v4'
   }
 ])
@@ -59,7 +54,7 @@ const sideLinks = ref([
   { id: 1, label: 'OFERTAS', href: '#ofertas' },
   { id: 2, label: 'TEST DRIVE', href: '#teste-drive', featured: true },
   { id: 3, label: 'LOJAS', href: '#lojas' },
-  { id: 4, label: 'SERVIÇOS', href: '#servicos' },
+  { id: 4, label: 'SERVIÇOS', to: '/servicos' },
   { id: 5, label: 'SAC', href: '#sac' },
   { id: 6, label: 'PRIVACIDADE', href: '#privacidade' }
 ])
@@ -98,9 +93,9 @@ onBeforeUnmount(() => {
 
 <template>
   <header ref="headerRef" class="header">
-    <a href="/" class="header__logo" aria-label="Vinci - página inicial">
+    <RouterLink to="/" class="header__logo" aria-label="Vinci - página inicial" @click="closeMenu">
       <img src="../assets/logo.svg" alt="Vinci" />
-    </a>
+    </RouterLink>
 
     <nav class="header__nav" aria-label="Navegação principal">
       <ul class="header__list">
@@ -116,6 +111,15 @@ onBeforeUnmount(() => {
           >
             {{ item.label }}
           </button>
+
+          <RouterLink
+            v-else-if="item.to"
+            :to="item.to"
+            class="header__link"
+            @click="closeMenu"
+          >
+            {{ item.label }}
+          </RouterLink>
 
           <a v-else :href="item.href" class="header__link" @click="closeMenu">
             {{ item.label }}
@@ -135,7 +139,7 @@ onBeforeUnmount(() => {
             />
             <p class="vehicle__name">{{ vehicle.name }}</p>
             <div class="vehicle__actions">
-              <a :href="vehicle.moreHref" class="vehicle__link" @click="closeMenu">Ver mais</a>
+              <RouterLink to="/veiculos" class="vehicle__link" @click="closeMenu">Ver mais</RouterLink>
               <a :href="vehicle.buyHref" class="vehicle__link" @click="closeMenu">Comprar</a>
             </div>
           </li>
@@ -145,7 +149,17 @@ onBeforeUnmount(() => {
           <p class="menu__side-title">NAVEGUE</p>
           <ul class="menu__side-list">
             <li v-for="link in sideLinks" :key="link.id">
+              <RouterLink
+                v-if="link.to"
+                :to="link.to"
+                class="menu__side-link"
+                :class="{ 'is-featured': link.featured }"
+                @click="closeMenu"
+              >
+                {{ link.label }}
+              </RouterLink>
               <a
+                v-else
                 :href="link.href"
                 class="menu__side-link"
                 :class="{ 'is-featured': link.featured }"
